@@ -9,7 +9,14 @@ ICON_PDFS := $(ICON_NAMES:%=assets/%.pdf)
 all: $(DOCS:%=%.pdf)
 
 assets/%.pdf: assets/%.svg
-	inkscape $< --export-type=pdf --export-filename=$@
+	@if command -v inkscape >/dev/null 2>&1; then \
+		inkscape $< --export-type=pdf --export-filename=$@; \
+	elif [ -f $@ ]; then \
+		echo "Using existing $@ (install Inkscape to regenerate it from $<)"; \
+	else \
+		echo "Missing $@ and Inkscape is not installed; cannot convert $<" >&2; \
+		exit 1; \
+	fi
 
 %.pdf: %.tex cvcommon.sty assets/profile-square.jpg $(ICON_PDFS)
 	$(TEX) $<
